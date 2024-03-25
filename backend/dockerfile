@@ -1,0 +1,34 @@
+FROM node:alpine as builder
+
+# RUN mkdir -p /mnt
+
+WORKDIR /mnt
+
+COPY . .
+
+RUN npm i
+
+RUN npx prisma db pull
+
+RUN npx prisma generate
+
+RUN npm run build
+
+FROM node:alpine
+
+WORKDIR /mnt
+
+COPY --from=builder /mnt/dist ./dist
+
+COPY --from=builder /mnt/node_modules ./node_modules
+
+COPY --from=builder /mnt/package.json .
+
+COPY --from=builder /mnt/package-lock.json .
+
+
+# COPY --from=builder /mnt/prisma ./prisma
+
+EXPOSE 8080
+
+CMD ["npm", "run", "start"]

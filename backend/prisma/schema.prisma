@@ -1,0 +1,230 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Announcement {
+  announcementId Int      @id @default(autoincrement())
+  content        String   @db.Text
+  createdTime    DateTime @db.DateTime(0)
+  isShowing      Boolean
+  userId         Int
+  User           User     @relation(fields: [userId], references: [userId], onUpdate: Restrict, map: "Announcement_User_userId_fk")
+
+  @@index([userId], map: "Announcement_User_userId_fk")
+}
+
+model Athlete {
+  Id          String        @id @db.VarChar(15)
+  Prefix      String        @db.VarChar(10)
+  Name        String        @db.VarChar(100)
+  SID         String?       @db.VarChar(30)
+  Concern     String?       @db.VarChar(255)
+  CheckinLogs CheckinLogs[]
+  Member      Member[]
+
+  @@index([SID], map: "SID")
+}
+
+model CheckinLogs {
+  Id      Int      @id @default(autoincrement())
+  MID     Int
+  AID     String   @db.VarChar(15)
+  stamp   DateTime @db.DateTime(0)
+  Athlete Athlete  @relation(fields: [AID], references: [Id], onUpdate: Restrict, map: "CheckinLogs_Athlete_Id_fk")
+  Match   Match    @relation(fields: [MID], references: [Id], onUpdate: Restrict, map: "CheckinLogs___Match_Id_fk")
+
+  @@index([AID], map: "CheckinLogs_Athlete_Id_fk")
+  @@index([MID], map: "CheckinLogs___Match_Id_fk")
+}
+
+model Match {
+  Id                    Int           @id @default(autoincrement())
+  startTime             DateTime      @db.DateTime(0)
+  CompetitionRoom       String        @db.VarChar(100)
+  CompetitionInstitute  String        @db.VarChar(20)
+  Description           String?       @db.VarChar(100)
+  TID1                  Int
+  TID2                  Int
+  Result                String?       @db.VarChar(10)
+  isVerify              Boolean
+  Scoreinput            DateTime?     @db.DateTime(0)
+  CheckinLogs           CheckinLogs[]
+  Team_Match_TID1ToTeam Team          @relation("Match_TID1ToTeam", fields: [TID1], references: [Id], onUpdate: Restrict, map: "Match_Team_Id_fk")
+  Team_Match_TID2ToTeam Team          @relation("Match_TID2ToTeam", fields: [TID2], references: [Id], onUpdate: Restrict, map: "Match_Team_Id_fk2")
+  Score                 Score[]
+  medal                 medal[]
+
+  @@index([TID1], map: "Match_Team_Id_fk")
+  @@index([TID2], map: "Match_Team_Id_fk2")
+}
+
+model Member {
+  id      Int      @id @default(autoincrement())
+  TId     Int?
+  AId     String?  @db.VarChar(15)
+  Athlete Athlete? @relation(fields: [AId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Member_Athlete_Id_fk")
+  Team    Team?    @relation(fields: [TId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Member_Team_Id_fk")
+
+  @@index([AId], map: "Member_Athlete_Id_fk")
+  @@index([TId], map: "Member_Team_Id_fk")
+}
+
+model Score {
+  id       Int    @id @default(autoincrement())
+  Match_Id Int
+  Round    String @db.VarChar(20)
+  T1_Score Int
+  T2_Score Int
+  Match    Match  @relation(fields: [Match_Id], references: [Id], onUpdate: Restrict, map: "Score_Match_Id_fk")
+
+  @@index([Match_Id], map: "Score_Match_Id_fk")
+}
+
+model Sport {
+  Id     Int          @id
+  name   String       @db.VarChar(100)
+  gender Sport_gender
+  type   Sport_type
+  group  String?      @db.VarChar(1)
+  Team   Team[]
+}
+
+model Staff {
+  Id        String      @id @db.VarChar(255)
+  Prefix    String      @db.VarChar(10)
+  Name      String      @db.VarChar(100)
+  Telephone String?     @db.VarChar(15)
+  Position  String      @db.VarChar(20)
+  StaffTeam StaffTeam[]
+}
+
+model StaffTeam {
+  id    Int    @id @default(autoincrement())
+  TID   Int
+  SID   String @db.VarChar(255)
+  Staff Staff  @relation(fields: [SID], references: [Id], onUpdate: Restrict, map: "StaffTeam_Staff_Id_fk")
+  Team  Team   @relation(fields: [TID], references: [Id], onUpdate: Restrict, map: "StaffTeam_Team_Id_fk")
+
+  @@index([SID], map: "StaffTeam_Staff_Id_fk")
+  @@index([TID], map: "StaffTeam_Team_Id_fk")
+}
+
+model StdStaff {
+  Id         String               @id @db.VarChar(50)
+  Prefix     String               @db.VarChar(10)
+  Name       String               @db.VarChar(100)
+  StudentId  String?              @db.VarChar(15)
+  Major      String?              @db.VarChar(20)
+  Faculty    String               @db.VarChar(20)
+  University StdStaff_University?
+  Concern    String?              @db.VarChar(20)
+}
+
+model Team {
+  Id                     Int            @id
+  Institute              Team_Institute
+  SID                    Int?
+  Match_Match_TID1ToTeam Match[]        @relation("Match_TID1ToTeam")
+  Match_Match_TID2ToTeam Match[]        @relation("Match_TID2ToTeam")
+  Member                 Member[]
+  StaffTeam              StaffTeam[]
+  Sport                  Sport?         @relation(fields: [SID], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "Team_Sport_Id_fk")
+
+  @@index([SID], map: "Team_Sport_Id_fk")
+}
+
+model User {
+  userId       Int            @id @default(autoincrement())
+  name         String         @db.VarChar(50)
+  username     String         @db.VarChar(50)
+  password     String         @db.VarChar(255)
+  privilege    User_privilege
+  role         User_role
+  Announcement Announcement[]
+}
+
+model medal {
+  Id        Int              @id @default(autoincrement())
+  matchId   Int?
+  institute medal_institute?
+  medal     medal_medal?
+  point     Int?
+  Match     Match?           @relation(fields: [matchId], references: [Id], onDelete: Restrict, onUpdate: Restrict, map: "medal_Match_Id_fk")
+
+  @@index([matchId], map: "medal_Match_Id_fk")
+}
+
+model regisTracking {
+  id        Int     @id @default(autoincrement())
+  sport     String  @db.VarChar(50)
+  sex       String  @db.VarChar(10)
+  type      String  @db.VarChar(10)
+  institute String  @db.VarChar(25)
+  status    Boolean
+}
+
+model staffCheckinLogs {
+  id    Int      @id @default(autoincrement())
+  SID   String   @db.VarChar(20)
+  stamp DateTime @db.DateTime(0)
+}
+
+enum Team_Institute {
+  KMUTT
+  KMITL
+  KMUTNB
+}
+
+enum medal_institute {
+  KMUTT
+  KMITL
+  KMUTNB
+}
+
+enum Sport_gender {
+  male
+  female
+  mix
+}
+
+enum medal_medal {
+  gold
+  silver
+  bronze
+}
+
+enum Sport_type {
+  solo
+  duo
+  team
+}
+
+enum User_privilege {
+  admin
+  moderator
+}
+
+enum User_role {
+  Dev
+  Union
+  Football
+  Futsal
+  Basketball
+  Volleyball
+  Badminton
+  Bridge
+  Esport
+  Petangue
+  Tabletennis
+}
+
+enum StdStaff_University {
+  KMUTT
+  KMITL
+  KMUTNB
+}
