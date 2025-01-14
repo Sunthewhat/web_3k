@@ -1,12 +1,10 @@
-FROM node:alpine as builder
+FROM node:20-alpine3.20 as builder
 
 # RUN mkdir -p /mnt
 
 WORKDIR /mnt
 
 COPY . .
-
-RUN apk add --no-cache openssl
 
 RUN npm i
 
@@ -20,7 +18,7 @@ RUN npx prisma generate
 
 RUN npm run build
 
-FROM node:alpine
+FROM node:20-alpine3.20
 
 WORKDIR /mnt
 
