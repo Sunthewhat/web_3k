@@ -16,7 +16,7 @@ const corsOptions: CorsOptions = {
 		if (allowedOrigin || isExcludedUrl) {
 			callback(null, true);
 		} else {
-			callback(new Error('Not allowed by CORS'));
+			callback(new Error(`Not allowed by CORS at ${origin}`));
 		}
 	},
 	credentials: true,
