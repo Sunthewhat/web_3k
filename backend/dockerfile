@@ -6,6 +6,8 @@ WORKDIR /mnt
 
 COPY . .
 
+RUN apk add --no-cache openssl
+
 RUN npm i
 
 ARG DATABASE_URL
