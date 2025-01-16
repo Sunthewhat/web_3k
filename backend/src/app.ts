@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
 import form from './routers/form.routes';
-import corsConfig from './corsConfig';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import auth from './routers/auth.routes';
