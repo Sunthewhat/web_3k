@@ -19,7 +19,11 @@ const port = process.env.PORT || 4000;
 
 app.use(
 	cors({
-		origin: '*',
+		origin: [
+			'https://regis.web3k.staging.sunthewhat.com',
+			'https://admin.web3k.staging.sunthewhat.com',
+			'https://public.web3k.staging.sunthewhat.com',
+		],
 		credentials: true,
 	})
 );
