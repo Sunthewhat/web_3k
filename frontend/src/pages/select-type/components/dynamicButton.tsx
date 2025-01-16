@@ -32,7 +32,7 @@ export const DynamicButtons: React.FC<ButtonListProps> = ({
             const isAvailable = availability && !availability.status;
             return (
               <Button
-                // isDisabled={!isAvailable}
+                isDisabled={!isAvailable}
                 key={innerIndex}
                 w="30dvw"
                 maxW="170px"
